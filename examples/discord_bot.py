@@ -9,6 +9,7 @@ from discord.ext import commands
 
 
 SETTINGS = {
+    "prefix": "!",
     "discord_token": "token",
     "sythe_username": "username or email",
     "sythe_password": "password",
@@ -28,7 +29,12 @@ class SytheCommands(commands.Cog):
             "last_bump": None
         }
 
+        print("Logging in...")  # Just to confirm to user that it's working
+
     async def sythe_spawner(self, ctx):
+        """ Spawn a Chrome instance to interact with Sythe.org
+        It's spawned in a different task to not crash the bot
+        """
         if not await self.can_bump(ctx):
             return
 
@@ -74,6 +80,13 @@ class SytheCommands(commands.Cog):
                 except asyncio.TimeoutError:
                     return await ctx.send("**[ ❌ ]** Waited too long for oauth, stopping...")
 
+        # For some dumb reasons, Sythe.org needs double login to work.
+        # Keeping this in here for now...
+        try:
+            await chrome.login()
+        except Exception:
+            pass
+
         bump_success = 0
 
         await ctx.send("Reading bump list")
@@ -94,37 +107,53 @@ class SytheCommands(commands.Cog):
                 await ctx.send(f"**[ ❌ ]** Failed to bump **{thread}**, skipping...\nDEBUG: {e}")
 
         chrome.save_cookies()
+        self.update_settings(last_bump=int(time.time()))
         await ctx.send(
             f"✅ {ctx.author.mention} Bump complete, {bump_success}/{len(bump_list)} threads successful.\n"
             f"📝 **Sythe.py** version: {sythe.__version__}"
         )
 
+    def write_settings(self, data: dict):
+        """ Write dict values to the 'database' """
+        with open("./sythe.json", "w") as f:
+            f.write(json.dumps(data))
+
     def get_settings(self):
+        """ Get the 'database' settings """
         try:
             with open("./sythe.json", "r") as f:
                 return json.load(f)
         except FileNotFoundError:
-            with open("./sythe.json", "w") as f:
-                f.write(json.dumps(self.default_settings))
-                return self.default_settings
-
-    def write_settings(self, data: dict):
-        with open("./sythe.json", "w") as f:
-            f.write(json.dumps(data))
+            self.write_settings(self.default_settings)
+            return self.default_settings
 
     def append_thread(self, thread_id: int):
+        """ Append thread from the thread JSON """
         data = self.get_settings()
         data["threads"].append(thread_id)
         self.write_settings(data)
 
     def remove_thread(self, thread_id: int):
+        """ Remove thread from the thread JSON """
         data = self.get_settings()
         data["threads"] = [g for g in data["threads"] if g != thread_id]
         self.write_settings(data)
 
-    def update_timestamp(self):
+    def update_settings(self, **kwargs):
+        """ Update setting(s) in config.json """
         data = self.get_settings()
-        data["last_bump"] = int(time.time())
+        for key, value in kwargs.items():
+            data[key] = value
+        self.write_settings(data)
+
+    def delete_settings(self, *args):
+        """ Delete setting(s) in config.json """
+        data = self.get_settings()
+        for g in args:
+            try:
+                del data[g]
+            except KeyError:
+                pass
         self.write_settings(data)
 
     async def can_bump(self, ctx):
@@ -161,12 +190,10 @@ class SytheCommands(commands.Cog):
             if not data:
                 return await ctx.send("No threads found...")
 
-            all_threads = [
-                f"[{i}] <https://www.sythe.org/threads/{g['thread_id']}/> (Text: {g['thread_text']})"
+            return await ctx.send("\n".join([
+                f"[{i}] <https://www.sythe.org/threads/{g}/>"
                 for i, g in enumerate(data, start=1)
-            ]
-
-            return await ctx.send("\n".join(all_threads))
+            ]))
 
         # Check if the thread exists
         thread_in_db = [g for g in data if g == thread_id]
@@ -194,6 +221,6 @@ class SytheCommands(commands.Cog):
         )
 
 
-bot = commands.Bot(command_prefix=commands.when_mentioned_or("!"))
+bot = commands.Bot(command_prefix=commands.when_mentioned_or(SETTINGS["prefix"]))
 bot.add_cog(SytheCommands(bot))
 bot.run(SETTINGS["discord_token"])
