@@ -253,7 +253,7 @@ class Sythe:
             self.driver.find_element_by_class_name("redactor_btn_switchmode").click()
 
         self.print_debug("Attempting to type something")
-        self.driver.switch_to_frame(textbox)
+        self.driver.switch_to.frame(textbox)
         await asyncio.sleep(1)
 
         self.print_debug("Cleaning everything just in case of cache")
