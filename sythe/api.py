@@ -140,8 +140,6 @@ class Sythe:
                 get_code = input("Please provide 2auth code\n> ")
 
             self.driver.find_element_by_id("ctrl_totp_code").send_keys(get_code)
-            await asyncio.sleep(1)
-            self.driver.find_element_by_id("ctrl_totp_code").submit()
             await asyncio.sleep(5)
             return False
         if "two-step" in str(url):
@@ -265,7 +263,7 @@ class Sythe:
         await asyncio.sleep(1)
         iframe_body.send_keys(text)
         await asyncio.sleep(1)
-        self.driver.switch_to_default_content()
+        self.driver.switch_to.default_content()
         await asyncio.sleep(3)
 
         if post:
