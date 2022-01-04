@@ -1,0 +1,7 @@
+{
+  "sythe_username": "sythe_username_or_password",
+  "sythe_password": "sythe_password",
+  "discord_webhook": "discord_webook_url_here",
+  "login_attempts": 3,
+  "bump_delay": 1
+}
