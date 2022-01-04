@@ -1,6 +1,10 @@
 # Custom ignore
 debug_bin/
-*.json
+config.json
+oauth.txt
+
+settings/*.txt
+settings/*.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
