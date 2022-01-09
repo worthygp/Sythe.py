@@ -76,7 +76,7 @@ def main():
     progress_bumper.update_task(3, f"Bumping threads {bump_success}/{len(threads)}")
     progress_bumper.show(ctx, -1)
 
-    now = int(time.time()) + api.wait_time
+    now = int(time.time())
     api.bump_timestamp(update=now)
     ctx.send(
         f"✅ Bump complete, **{bump_success}/{len(threads)}** threads successful.\n"
