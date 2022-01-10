@@ -33,25 +33,29 @@ def main():
     progress_bumper.show(ctx, 1)
 
     has_token = api.token()
+    use_oauth = config.get("oauth", True)
     if not has_token:
         msg_oauth = ctx.send("📝 Not logged in... attempting to login")
         api.login()
 
-        attempts = 0
-        while True:
-            if attempts >= config["login_attempts"]:
-                msg_oauth.edit(f"🚪 Failed to login after {attempts} attempts, exiting...")
-                sys.exit(0)
+        if use_oauth:
+            attempts = 0
+            while True:
+                if attempts >= config["login_attempts"]:
+                    msg_oauth.edit(f"🚪 Failed to login after {attempts} attempts, exiting...")
+                    sys.exit(0)
 
-            api.oauth(msg_oauth)
-            recheck_token = api.token()
-            if recheck_token:
-                msg_oauth.edit("✅ Valid oauth code submitted, logging in...")
-                time.sleep(5)
-                msg_oauth.delete()
-                break
-            else:
-                attempts += 1
+                api.oauth(msg_oauth)
+                recheck_token = api.token()
+                if recheck_token:
+                    msg_oauth.edit("✅ Valid oauth code submitted, logging in...")
+                    time.sleep(5)
+                    msg_oauth.delete()
+                    break
+                else:
+                    attempts += 1
+        else:
+            msg_oauth.delete()
     else:
         # Already logged in
         progress_bumper.show(ctx, 2)
