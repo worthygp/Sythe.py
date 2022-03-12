@@ -1,5 +1,6 @@
 # Custom ignore
 debug_bin/
+debug/
 config.json
 oauth.txt
 

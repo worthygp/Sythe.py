@@ -110,7 +110,9 @@ class Sythe:
         )
 
         if self.html_debug:
-            with open(f"./debug/{int(time.time())}_{query.replace('/', '_')}.html", "w") as f:
+            if not os.path.exists("./debug"):
+                os.mkdir("./debug")
+            with open(f"./debug/{int(time.time())}_{query.replace('/', '_')}.html", "w", encoding="utf8") as f:
                 f.write(r.content.decode())
 
         self.write_cookies(r)

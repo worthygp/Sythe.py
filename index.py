@@ -10,7 +10,12 @@ with open("./config.json", "r") as f:
     config = json.load(f)
 
 ctx = Context(config["discord_webhook"])
-api = Sythe(config["sythe_username"], config["sythe_password"])
+debug = config.get("debug", False)
+
+api = Sythe(
+    config["sythe_username"], config["sythe_password"],
+    html_debug=debug
+)
 
 ctx.send("✨ Script started, will start checking for bump in 10 seconds...")
 
