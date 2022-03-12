@@ -50,7 +50,10 @@ def main():
                     msg_oauth.edit(f"🚪 Failed to login after {attempts} attempts, exiting...")
                     sys.exit(0)
 
-                api.oauth(msg_oauth)
+                attempt_oauth = api.oauth(msg_oauth)
+                if debug:
+                    print(attempt_oauth)
+
                 recheck_token = api.token()
                 if recheck_token:
                     msg_oauth.edit("✅ Valid oauth code submitted, logging in...")
